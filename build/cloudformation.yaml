@@ -1,0 +1,332 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Handle compliance events from the account api
+
+Parameters:
+  ResourceSuffix:
+    Type: String
+    Description: The name appended to resources to enable separate stacks for feature branches
+
+  EnvironmentSuffix:
+    Description: A name appended to resources to enable separte stacks per environment.
+    Type: String
+
+  Environment:
+    Description: The environment to use for configuration of the application.
+    Type: String
+
+  Project:
+    Description: The project name.
+    Type: String
+
+Conditions:
+  IsMaster: !Equals [!Ref ResourceSuffix, ""]
+
+Resources:
+  Queue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${Project}${EnvironmentSuffix}${ResourceSuffix}
+      MessageRetentionPeriod: 1209600 #14 days
+      VisibilityTimeout: 950
+      KmsMasterKeyId:
+        Fn::ImportValue: !Sub ofx-shared-secrets-kms-arn${EnvironmentSuffix}
+
+  QueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref Queue
+      PolicyDocument:
+        Statement:
+          Resource: !GetAtt Queue.Arn
+          Action:
+            - sqs:SendMessage
+          Principal:
+            AWS: "*"
+          Effect: Allow
+          Condition:
+            ArnEquals:
+              aws:SourceArn:
+                - Fn::ImportValue: !Sub "stp-account-sns-arn${EnvironmentSuffix}"
+
+  Subscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !GetAtt Queue.Arn
+      Protocol: sqs
+      RawMessageDelivery: true
+      FilterPolicy:
+        Type:
+          - AccountCreated
+      TopicArn:
+        Fn::ImportValue: !Sub "stp-account-sns-arn${EnvironmentSuffix}"
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${Project}${EnvironmentSuffix}${ResourceSuffix}
+      RetentionInDays: 14
+
+  Function:
+    Type: AWS::Serverless::Function
+    DependsOn: LogGroup
+    Properties:
+      FunctionName: !Sub ${Project}${EnvironmentSuffix}${ResourceSuffix}
+      CodeUri: ./packages/memories-image-ingestor-lambda
+      Handler: STP.Lambda.Template.Lambda::STP.Lambda.Template.Lambda.Function::Execute
+      Runtime: dotnetcore3.1
+      Timeout: 50
+      ReservedConcurrentExecutions: 1
+      Policies:
+        - VPCAccessPolicy: {}
+        - SQSPollerPolicy:
+            QueueName: !GetAtt Queue.QueueName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - kms:GenerateDataKey
+                - kms:Decrypt
+              Resource:
+                Fn::ImportValue: !Sub ofx-shared-secrets-kms-arn${EnvironmentSuffix}
+      Environment:
+        Variables:
+          Environment: !Ref Environment
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue core-network-BaseSecurityGroup
+        SubnetIds:
+          - !ImportValue core-network-Private0Subnet
+          - !ImportValue core-network-Private1Subnet
+          - !ImportValue core-network-Private2Subnet
+      Events:
+        MySQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt Queue.Arn
+            BatchSize: 10
+
+  LogGroupStreaming:
+    Type: AWS::Logs::SubscriptionFilter
+    Properties:
+      DestinationArn: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:ofx-shared-splunk${EnvironmentSuffix}
+      FilterPattern: ""
+      LogGroupName: !Ref LogGroup
+
+  QueueOldMessageAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${Queue.QueueName} Queue Old Message Alarm"
+      AlarmDescription: !Sub "${Queue.QueueName} queue has a message that hasn't been handled for too long."
+      Namespace: AWS/SQS
+      MetricName: ApproximateAgeOfOldestMessage
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt Queue.QueueName
+      TreatMissingData: notBreaching
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Maximum
+      Threshold: 900
+      Period: 300
+      EvaluationPeriods: 1
+      AlarmActions:
+        Fn::If:
+          - IsMaster
+          - - Fn::ImportValue: !Sub ofx-shared-alerting-sns-arn${EnvironmentSuffix}
+          - - arn:aws:sns:ap-southeast-2:000000000000:dev-null
+      OKActions:
+        Fn::If:
+          - IsMaster
+          - - Fn::ImportValue: !Sub ofx-shared-alerting-sns-arn${EnvironmentSuffix}
+          - - arn:aws:sns:ap-southeast-2:000000000000:dev-null
+
+  ErrorCountAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${Function} Errors Alarm"
+      AlarmDescription: !Sub "${Function} lambda is reporting a high error rate."
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref Function
+        - Name: Resource
+          Value: !Ref Function
+      TreatMissingData: notBreaching
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Threshold: 10
+      Period: 60
+      EvaluationPeriods: 3
+      AlarmActions:
+        Fn::If:
+          - IsMaster
+          - - Fn::ImportValue: !Sub ofx-shared-alerting-sns-arn${EnvironmentSuffix}
+          - - arn:aws:sns:ap-southeast-2:000000000000:dev-null
+      OKActions:
+        Fn::If:
+          - IsMaster
+          - - Fn::ImportValue: !Sub ofx-shared-alerting-sns-arn${EnvironmentSuffix}
+          - - arn:aws:sns:ap-southeast-2:000000000000:dev-null
+
+  WarningCount:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref LogGroup
+      FilterPattern: '"\"Level\":\"Warning\""'
+      MetricTransformations:
+        - MetricValue: "1"
+          MetricNamespace: !Sub ${AWS::StackName}
+          MetricName: WarningCount
+          DefaultValue: 0
+
+  Dashboard:
+    Type: "AWS::CloudWatch::Dashboard"
+    Properties:
+      DashboardName: !Ref AWS::StackName
+      DashboardBody: !Sub '{
+        "widgets": [
+        {
+        "type": "metric",
+        "x": 0,
+        "y": 0,
+        "width": 8,
+        "height": 6,
+        "properties": {
+        "title": "Age of Oldest Message in the Queue",
+        "annotations": {
+        "alarms": [
+        "${QueueOldMessageAlarm.Arn}"
+        ]
+        },
+        "view": "timeSeries",
+        "stacked": false
+        }
+        },
+        {
+        "type": "metric",
+        "x": 8,
+        "y": 0,
+        "width": 8,
+        "height": 6,
+        "properties": {
+        "title": "Error Count",
+        "annotations": {
+        "alarms": [
+        "${ErrorCountAlarm.Arn}"
+        ]
+        },
+        "view": "timeSeries",
+        "stacked": false
+        }
+        },
+        {
+        "type": "metric",
+        "x": 16,
+        "y": 0,
+        "width": 8,
+        "height": 6,
+        "properties": {
+        "metrics": [
+        [ "AWS/Lambda", "Invocations", "FunctionName", "${Function}", "Resource", "${Function}", { "stat": "Sum" } ]
+        ],
+        "region": "ap-southeast-2",
+        "title": "Invocations"
+        }
+        },
+        {
+        "type": "metric",
+        "x": 12,
+        "y": 6,
+        "width": 12,
+        "height": 6,
+        "properties": {
+        "metrics": [
+        [ "AWS/Lambda", "Duration", "FunctionName", "${Function}", "Resource", "${Function}", { "stat": "Minimum" } ],
+        [ "...", { "stat": "Average" } ],
+        [ "...", { "stat": "Maximum" } ]
+        ],
+        "region": "ap-southeast-2"
+        }
+        },
+        {
+        "type": "metric",
+        "x": 0,
+        "y": 6,
+        "width": 12,
+        "height": 9,
+        "properties": {
+        "metrics": [
+        [ "AWS/Lambda", "Errors", "FunctionName", "${Function}", "Resource", "${Function}", { "id": "errors", "color": "#d13212" } ],
+        [ ".", "Invocations", ".", ".", ".", ".", { "id": "invocations", "visible": false } ],
+        [ { "expression": "100 - 100 * errors / MAX([errors, invocations])", "label": "Success rate (%)", "id": "availability", "yAxis": "right" } ],
+        [ "${Function}", "WarningCount", { "id": "m1", "label": "Warnings" } ]
+        ],
+        "region": "ap-southeast-2",
+        "title": "Error & warning count and success rate (%)",
+        "yAxis": {
+        "right": {
+        "max": 100
+        }
+        },
+        "period": 60,
+        "view": "timeSeries",
+        "stacked": false,
+        "stat": "Sum"
+        }
+        },
+        {
+        "type": "metric",
+        "x": 12,
+        "y": 12,
+        "width": 12,
+        "height": 6,
+        "properties": {
+        "metrics": [
+        [ "AWS/Lambda", "Throttles", "FunctionName", "${Function}", "Resource", "${Function}", { "stat": "Sum" } ]
+        ],
+        "region": "ap-southeast-2"
+        }
+        },
+        {
+        "type": "metric",
+        "x": 12,
+        "y": 18,
+        "width": 12,
+        "height": 6,
+        "properties": {
+        "metrics": [
+        [ "AWS/Lambda", "ConcurrentExecutions", "FunctionName", "${Function}", "Resource", "${Function}", { "stat": "Maximum" } ]
+        ],
+        "region": "ap-southeast-2",
+        "title": "Concurrent executions"
+        }
+        },
+        {
+        "type": "log",
+        "x": 0,
+        "y": 15,
+        "width": 12,
+        "height": 6,
+        "properties": {
+        "query": "SOURCE \"/aws/lambda/${Function}\" | filter Level=\"Error\"\n| stats count() as Count by MessageTemplate\n| sort Count desc",
+        "region": "ap-southeast-2",
+        "title": "Top Errors",
+        "view": "table"
+        }
+        },
+        {
+        "type": "log",
+        "x": 0,
+        "y": 21,
+        "width": 12,
+        "height": 6,
+        "properties": {
+        "query": "SOURCE \"/aws/lambda/${Function}\" | filter Level=\"Warning\"\n| stats count() as Count by MessageTemplate\n| sort Count desc",
+        "region": "ap-southeast-2",
+        "title": "Top Warnings",
+        "view": "table"
+        }
+        }
+        ]
+        }'

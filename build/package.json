@@ -1,0 +1,8 @@
+{
+  "description": "Build Tools",
+  "repository": {},
+  "license": "MIT",
+  "dependencies": {
+    "@ofx/bash-build-libraries": "1.0.59"
+  }
+}

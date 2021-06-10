@@ -10,13 +10,11 @@ namespace Memories.Image.Ingestor.Lambda
     public class MessageHandler
     {
         private readonly MessageAttributeHelper _messageAttributeHelper;
-        private readonly ValidationApiClient _validationApiClient;
         private readonly ILogger _logger;
 
-        public MessageHandler(MessageAttributeHelper messageAttributeHelper, ValidationApiClient validationApiClient, ILogger logger)
+        public MessageHandler(MessageAttributeHelper messageAttributeHelper, ILogger logger)
         {
             _messageAttributeHelper = messageAttributeHelper;
-            _validationApiClient = validationApiClient;
             _logger = logger;
         }
 
@@ -31,7 +29,7 @@ namespace Memories.Image.Ingestor.Lambda
 
                 switch (messageAttributes.Type)
                 {
-                    case nameof(AccountCreated):
+                    case nameof(ImageCreated):
                         await HandleAccountCreated(sqsMessage);
                         break;
                     default:
@@ -47,8 +45,7 @@ namespace Memories.Image.Ingestor.Lambda
 
         private async Task HandleAccountCreated(SQSMessage sqsMessage)
         {
-            var receivedMessage = JsonConvert.DeserializeObject<AccountCreated>(sqsMessage.Body);
-            await _validationApiClient.ValidateAccount(receivedMessage);
+            var receivedMessage = JsonConvert.DeserializeObject<ImageCreated>(sqsMessage.Body);
         }
     }
 }

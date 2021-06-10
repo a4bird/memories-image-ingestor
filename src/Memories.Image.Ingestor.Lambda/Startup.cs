@@ -48,12 +48,6 @@ namespace Memories.Image.Ingestor.Lambda
             services.AddSingleton(logger);
             services.AddSingleton<MessageAttributeHelper>();
             services.AddTransient<MessageHandler>();
-            services.AddTransient<OutgoingRequestLogger>();
-            services.AddHttpClient<ValidationApiClient>(client => 
-            {
-                client.BaseAddress = new Uri(configuration["ValidationApi:BaseUrl"]);
-                client.DefaultRequestHeaders.Add("SystemId", Constants.ApplicationName);
-            }).AddHttpMessageHandler<OutgoingRequestLogger>();
 
             return services.BuildServiceProvider();
         }
