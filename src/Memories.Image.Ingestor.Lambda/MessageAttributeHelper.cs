@@ -1,19 +1,17 @@
-﻿using System;
-using static Amazon.Lambda.SQSEvents.SQSEvent;
+﻿using System.Text;
+using static Amazon.S3.Util.S3EventNotification;
 
 namespace Memories.Image.Ingestor.Lambda
 {
     public class MessageAttributeHelper
     {
-        public MessageAttributes Extract(SQSMessage sqsMessage)
+        public MessageAttributes Extract(S3EventNotificationRecord s3EventNotification)
         {
             return new MessageAttributes
             {
-                Type = sqsMessage.MessageAttributes["Type"].StringValue,
-                CreateTime = DateTime.Parse(sqsMessage.MessageAttributes["CreatedTime"].StringValue),
-                SequenceId = sqsMessage.MessageAttributes["SequenceId"].StringValue,
-                MessageId = sqsMessage.MessageAttributes["MessageId"].StringValue,
-                TraceParent = sqsMessage.MessageAttributes["TraceParent"].StringValue
+                Key =  s3EventNotification.S3.Object.Key,
+                ETag = s3EventNotification.S3.Object.ETag,
+                Size = s3EventNotification.S3.Object.Size,
             };
         }
     }

@@ -4,10 +4,8 @@ namespace Memories.Image.Ingestor.Lambda
 {
     public class MessageAttributes
     {
-        public string Type { get; set; }
-        public string MessageId { get; set; }
-        public string TraceParent { get; set; }
-        public string SequenceId { get; set; }
-        public DateTime CreateTime { get; set; }
+        public string Key { get; set; }
+        public long Size { get; set; }
+        public string ETag { get; set; }
     }
 }

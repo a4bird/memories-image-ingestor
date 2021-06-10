@@ -19,7 +19,8 @@ namespace Memories.Image.Ingestor.Lambda
         }
 
         private static ILogger CreateLogger()
-        {
+        {            
+
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)

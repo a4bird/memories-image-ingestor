@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Amazon.Lambda.Core;
-using Amazon.Lambda.SQSEvents;
+using Amazon.Lambda.S3Events;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -20,12 +20,12 @@ namespace Memories.Image.Ingestor.Lambda
             _logger = _serviceProvider.GetRequiredService<ILogger>();
         }
 
-        public async Task Execute(SQSEvent sqsEvent)
+        public async Task Execute(S3Event s3Event)
         {
             var messageHandler = _serviceProvider.GetRequiredService<MessageHandler>();
-            _logger.Information("Beginning to process {Count} records.", sqsEvent.Records.Count);
+            _logger.Information("Beginning to process {Count} records.", s3Event.Records.Count);
 
-            var tasks = sqsEvent.Records.Select(messageHandler.Handle);
+            var tasks = s3Event.Records.Select(messageHandler.Handle);
 
             await Task.WhenAll(tasks);
         }

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Memories.Image.Ingestor.Lambda.InboundMessages;
 using Serilog;
-using static Amazon.Lambda.SQSEvents.SQSEvent;
+using static Amazon.S3.Util.S3EventNotification;
 
 namespace Memories.Image.Ingestor.Lambda
 {
@@ -18,34 +16,22 @@ namespace Memories.Image.Ingestor.Lambda
             _logger = logger;
         }
 
-        public async Task Handle(SQSMessage sqsMessage)
+        public void Handle(S3EventNotificationRecord s3EventNotification)
         {
+
             try
             {
-                var messageAttributes = _messageAttributeHelper.Extract(sqsMessage);
+                var messageAttributes = _messageAttributeHelper.Extract(s3EventNotification);
                 using var trace = new Trace(messageAttributes);
 
-                _logger.Information("Processing message {@message}", sqsMessage.Body);
+                _logger.Information("Processing file {@fileKey}", messageAttributes.Key);
 
-                switch (messageAttributes.Type)
-                {
-                    case nameof(ImageCreated):
-                        await HandleAccountCreated(sqsMessage);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(messageAttributes.Type), messageAttributes.Type);
-                }
             }
             catch (Exception e)
             {
-                _logger.Error(e, "Error occurred while processing SQS message {@message}", sqsMessage);
+                _logger.Error(e, "Error occurred while processing SQS message {@message}", s3EventNotification);
                 throw;
             }
-        }
-
-        private async Task HandleAccountCreated(SQSMessage sqsMessage)
-        {
-            var receivedMessage = JsonConvert.DeserializeObject<ImageCreated>(sqsMessage.Body);
         }
     }
 }
