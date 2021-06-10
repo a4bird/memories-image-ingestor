@@ -1,0 +1,6 @@
+https://ap-southeast-2.console.aws.amazon.com/sqs/v2/home?region=ap-southeast-2#/queues/https%3A%2F%2Fsqs.ap-southeast-2.amazonaws.com%2F989464300156%2Fmemories-album-photos-test/send-receive#/
+
+https://s3.console.aws.amazon.com/s3/object/my-memories-bucket?prefix=images/albums/TimeSheet/03May+-+07May+21.PNG
+
+STP.Lambda.Template.Lambda -> Memories.Image.Ingestor.Lambda
+
