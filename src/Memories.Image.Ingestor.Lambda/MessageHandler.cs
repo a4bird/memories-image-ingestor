@@ -16,7 +16,7 @@ namespace Memories.Image.Ingestor.Lambda
             _logger = logger;
         }
 
-        public void Handle(S3EventNotificationRecord s3EventNotification)
+        public async Task Handle(S3EventNotificationRecord s3EventNotification)
         {
 
             try

@@ -50,6 +50,8 @@ namespace Memories.Image.Ingestor.Lambda
             services.AddSingleton<MessageAttributeHelper>();
             services.AddTransient<MessageHandler>();
 
+            services.AddAWSService<Amazon.S3.IAmazonS3>();
+
             return services.BuildServiceProvider();
         }
     }
