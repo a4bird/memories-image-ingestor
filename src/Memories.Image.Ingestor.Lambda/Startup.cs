@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using Amazon.S3;
+using Memories.Image.Ingestor.Lambda.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -36,6 +39,7 @@ namespace Memories.Image.Ingestor.Lambda
         {
             var environment = Environment.GetEnvironmentVariable("Environment");
             var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile($"appsettings.json")
                 .AddJsonFile($"appsettings.{environment}.json", true, false)
                 .AddEnvironmentVariables();
@@ -49,8 +53,11 @@ namespace Memories.Image.Ingestor.Lambda
             services.AddSingleton(logger);
             services.AddSingleton<MessageAttributeHelper>();
             services.AddTransient<MessageHandler>();
+            services.AddTransient<ICloudStorage, CloudStorage>();
 
-            services.AddAWSService<Amazon.S3.IAmazonS3>();
+            var awsOptions = configuration.GetAWSOptions();
+            services.AddDefaultAWSOptions(awsOptions);
+            services.AddAWSService<IAmazonS3>();
 
             return services.BuildServiceProvider();
         }
