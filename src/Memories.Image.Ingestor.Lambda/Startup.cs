@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using Amazon.DynamoDBv2;
 using Amazon.S3;
+using Memories.Image.Ingestor.Lambda.Common;
+using Memories.Image.Ingestor.Lambda.Data.Commands;
 using Memories.Image.Ingestor.Lambda.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,14 +53,34 @@ namespace Memories.Image.Ingestor.Lambda
         private static ServiceProvider ConfigureDependencyInjection(ILogger logger, IConfiguration configuration)
         {
             var services = new ServiceCollection();
+
+            services.Configure<DynamoDbOptions>(configuration.GetSection("DynamoDb"));
+
             services.AddSingleton(logger);
             services.AddSingleton<MessageAttributeHelper>();
             services.AddTransient<MessageHandler>();
             services.AddTransient<ICloudStorage, CloudStorage>();
+            services.AddTransient<ICreateImageObjectCommand, CreateImageObjectCommand>();
+
 
             var awsOptions = configuration.GetAWSOptions();
             services.AddDefaultAWSOptions(awsOptions);
-            services.AddAWSService<IAmazonS3>();
+            
+            if (Environment.GetEnvironmentVariable("Environment") != Constants.EnvironmentName.Local)
+            {
+                services.AddAWSService<IAmazonS3>();
+                services.AddAWSService<IAmazonDynamoDB>();
+            }
+            else
+            {
+                Log.Warning("Connecting to LocalStack");
+
+                services.AddSingleton<IAmazonDynamoDB>(new AmazonDynamoDBClient(
+                    new AmazonDynamoDBConfig
+                    {
+                        ServiceURL = configuration["dynamoDbServiceUrl"],
+                    }));
+            }
 
             return services.BuildServiceProvider();
         }
