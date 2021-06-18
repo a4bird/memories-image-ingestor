@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
-: ${SLUG?"VERSION env variable is required"}
+: ${SLUG?"SLUG env variable is required"}
 : ${BUILD_NUMBER?"BUILD_NUMBER env variable is required"}
 : ${PROJECT?"PROJECT env variable is required"}
 

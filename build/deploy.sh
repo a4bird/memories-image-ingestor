@@ -11,15 +11,15 @@ stack_name="${PROJECT}-${ENV_SUFFIX}-${SLUG}"
 
 
 echo "Deploying ${stack_name}"
-aws s3 cp "s3://a4bird-memories-lambda-repo/${project}/${BUILD_NUMBER}/packaged.yaml" packaged.yaml
+aws s3 cp "s3://a4bird-memories-lambda-repo/${PROJECT}/${BUILD_NUMBER}/packaged.yaml" packaged.yaml
 aws cloudformation deploy \
   --stack-name=${stack_name} \
   --template-file=packaged.yaml \
   --capabilities="CAPABILITY_NAMED_IAM" \
   --no-fail-on-empty-changeset \
   --parameter-overrides \
-      Environment="${ENVIRONMENT}" \
-      ResourceSuffix="${SLUG}" \
+      SLUG="${SLUG}" \
       EnvironmentSuffix="${ENV_SUFFIX}" \
+      Environment="${ENVIRONMENT}" \
       Project="${PROJECT}" \
-  --tags billing=a4bird Enterprise=Memories Project=${project} Version=${BUILD_NUMBER} Branch=${SLUG}
+  --tags billing=a4bird Enterprise=Memories Project=${PROJECT} Version=${BUILD_NUMBER} Branch=${SLUG}

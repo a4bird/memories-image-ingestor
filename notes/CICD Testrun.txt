@@ -1,3 +1,13 @@
-export PROJECT=memories-image-ingestor-lambda
+-- build
+
+export PROJECT=a4bird-memories-image-ingestor
 export BUILD_NUMBER=1.0.0.2
 export SLUG=main
+
+-- deploy
+
+export PROJECT=a4bird-memories-image-ingestor
+export BUILD_NUMBER=1.0.0.2
+export SLUG=main
+export ENV_SUFFIX=dev
+export ENVIRONMENT=development
