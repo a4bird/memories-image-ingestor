@@ -37,7 +37,7 @@ Resources:
       CodeUri: ./packages/memories-image-ingestor-lambda
       Handler: Memories.Image.Ingestor.Lambda::Memories.Image.Ingestor.Lambda.Function::Execute
       Runtime: dotnetcore3.1
-      Timeout: 50
+      Timeout: 180
       ReservedConcurrentExecutions: 1
       Role: !GetAtt FunctionRole.Arn
       Environment:
@@ -78,3 +78,11 @@ Resources:
                   - sqs:DeleteMessage
                   - sqs:GetQueueAttributes
                 Resource: "arn:aws:sqs:*:*:*"
+
+  
+  SQSEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      FunctionName: !GetAtt Function.Arn
+      EventSourceArn: arn:aws:sqs:ap-southeast-2:989464300156:memories-album-photos-test
+      MaximumBatchingWindowInSeconds: 10

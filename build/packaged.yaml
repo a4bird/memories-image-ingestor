@@ -33,10 +33,10 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Project}-${EnvironmentSuffix}-${SLUG}
-      CodeUri: s3://a4bird-memories-lambda-repo/memories-image-ingestor-lambda/1.0.0.2/4bfe9a221fcb1d6e3c32181d6ebd3331
+      CodeUri: s3://a4bird-memories-lambda-repo/a4bird-memories-image-ingestor/1.0.0.2/4bfe9a221fcb1d6e3c32181d6ebd3331
       Handler: Memories.Image.Ingestor.Lambda::Memories.Image.Ingestor.Lambda.Function::Execute
       Runtime: dotnetcore3.1
-      Timeout: 50
+      Timeout: 180
       ReservedConcurrentExecutions: 1
       Role:
         Fn::GetAtt:
@@ -81,3 +81,12 @@ Resources:
             - sqs:DeleteMessage
             - sqs:GetQueueAttributes
             Resource: arn:aws:sqs:*:*:*
+  SQSEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      FunctionName:
+        Fn::GetAtt:
+        - Function
+        - Arn
+      EventSourceArn: arn:aws:sqs:ap-southeast-2:989464300156:memories-album-photos-test
+      MaximumBatchingWindowInSeconds: 10
