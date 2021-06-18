@@ -9,8 +9,6 @@ stack_name="${PROJECT}-${SLUG}"
 
 stack_id=$(aws cloudformation describe-stacks --stack-name $stack_name --query "Stacks[0].StackId" --output text) || stack_id=""
 
-npm ci
-
 echo "Running the tests and publishing..."
 
 mkdir ./packages || true
