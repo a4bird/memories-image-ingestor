@@ -1,0 +1,104 @@
+name: Deploy Image Ingestor Lambda
+
+on:
+  deployment:
+  workflow_dispatch:
+
+env:
+  PROJECT: memories-image-ingestor-lambda
+  AWS_ACCOUNT_NUMBER: ${{ secrets.AWS_ACCOUNT_NUMBER }}
+  AWS_PRIMARY_REGION: ap-southeast-2
+  AWS_ROLE_TO_ASSUME: arn:aws:iam::${{ secrets.AWS_ACCOUNT_NUMBER }}:role/admin
+  ENV_SUFFIX: 'dev'
+  PREV_ENV: ''
+
+jobs:
+  setup:
+    name: Setup Variables
+    runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.branch-slug.outputs.branch }}
+      slug: ${{ steps.branch-slug.outputs.slug }}
+    steps:
+      - name: Create Slug
+        id: branch-slug
+        run: |
+          branch_ref=${GITHUB_REF#refs/heads/}
+          branch="${GITHUB_HEAD_REF:-$branch_ref}"
+          slug="${branch//\//-}"
+          echo ::set-output name=branch::${branch}
+          echo ::set-output name=slug::${slug,,}
+      - name: Display branch slug output
+        id: branch-slug-output
+        run: |
+          echo "branch is ${branch}"
+          echo "slug is ${slug}"
+        env:
+          branch: ${{steps.branch-slug.outputs.branch}}
+          slug: ${{steps.branch-slug.outputs.slug}}
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: [setup]
+    steps:
+      # - name: Set environment variables for staging
+      #   if: github.event.deployment.environment == 'staging'
+      #   run: |
+      #     echo "::set-env name=PREV_ENV::development"
+      #     echo "::set-env name=ENV_SUFFIX::stg"
+
+      # - name: Set environment variables for Production
+      #   if: github.event.deployment.environment == 'production'
+      #   run: |
+      #     echo "::set-env name=PREV_ENV::staging"
+      #     echo "::set-env name=ENV_SUFFIX::prod"
+
+      # - name: Get deployments from the preceding environment
+      #   if: env.PREV_ENV != ''
+      #   id: check_previous_stage
+      #   uses: octokit/request-action@v2.x
+      #   with:
+      #     route: GET /repos/:repository/deployments?sha=:sha&environment=:environment
+      #     repository: ${{ github.repository }}
+      #     sha: ${{ github.sha }}
+      #     environment: ${{ env.PREV_ENV }}
+      #     mediaType: |
+      #       previews:
+      #         - ant-man
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Check previous deployments
+      #   if: env.PREV_ENV != '' && steps.check_previous_stage.outputs.data == '[]'
+      #   run: |
+      #     echo "::error ::Must deploy to ${{ env.PREV_ENV }} environment before ${{ github.event.deployment.environment}}"
+      #     exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: npm run cdk-install
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        id: login-aws
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_PRIMARY_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 1200
+
+      - name: Deploy Lambda
+        id: deploy-lambda
+        working-directory: ./build
+        run: bash ./deploy.sh
+        env:
+          SLUG: ${{ needs.setup.outputs.slug }}
+          PROJECT: ${{ env.PROJECT }}
+          ENV_SUFFIX: ${{ env.ENV_SUFFIX }}
+          BUILD_NUMBER: ${{ github.event.deployment.payload.version }}
+          ENVIRONMENT: ${{ github.event.deployment.environment }}
+        

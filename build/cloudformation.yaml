@@ -23,45 +23,6 @@ Conditions:
   IsMaster: !Equals [!Ref ResourceSuffix, ""]
 
 Resources:
-  Queue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: !Sub ${Project}${EnvironmentSuffix}${ResourceSuffix}
-      MessageRetentionPeriod: 1209600 #14 days
-      VisibilityTimeout: 950
-      KmsMasterKeyId:
-        Fn::ImportValue: !Sub ofx-shared-secrets-kms-arn${EnvironmentSuffix}
-
-  QueuePolicy:
-    Type: AWS::SQS::QueuePolicy
-    Properties:
-      Queues:
-        - !Ref Queue
-      PolicyDocument:
-        Statement:
-          Resource: !GetAtt Queue.Arn
-          Action:
-            - sqs:SendMessage
-          Principal:
-            AWS: "*"
-          Effect: Allow
-          Condition:
-            ArnEquals:
-              aws:SourceArn:
-                - Fn::ImportValue: !Sub "stp-account-sns-arn${EnvironmentSuffix}"
-
-  Subscription:
-    Type: AWS::SNS::Subscription
-    Properties:
-      Endpoint: !GetAtt Queue.Arn
-      Protocol: sqs
-      RawMessageDelivery: true
-      FilterPolicy:
-        Type:
-          - AccountCreated
-      TopicArn:
-        Fn::ImportValue: !Sub "stp-account-sns-arn${EnvironmentSuffix}"
-
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
