@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Memories.Image.Ingestor.Lambda.Commands;
 using Memories.Image.Ingestor.Lambda.Common;
+using Memories.Image.Ingestor.Lambda.Common.Types;
 using Memories.Image.Ingestor.Lambda.Data.Requests;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -11,7 +12,7 @@ namespace Memories.Image.Ingestor.Lambda.Data.Commands
 {
     public interface ICreateImageObjectCommand
     {
-        Task CreateImageObject(CreateImageRequest request);
+        Task<Result> CreateImageObject(CreateImageRequest request);
     }
 
     public class CreateImageObjectCommand : CommandBase, ICreateImageObjectCommand
@@ -23,9 +24,10 @@ namespace Memories.Image.Ingestor.Lambda.Data.Commands
             _logger = logger;
         }
 
-        public async Task CreateImageObject(CreateImageRequest request)
+        public async Task<Result> CreateImageObject(CreateImageRequest request)
         {
 
+            _logger.Information("Handling DynamoDb Request {@request}", request);
             var imageObjectItem = new MemoriesModel
             {
                 Account = request.Account,
@@ -37,7 +39,10 @@ namespace Memories.Image.Ingestor.Lambda.Data.Commands
 
             try
             {
-                await DynamoDbClient.PutItemAsync(TableName, imageObjectItem);
+                var response = await DynamoDbClient.PutItemAsync(TableName, imageObjectItem);
+
+                return Result.Ok;
+                
             }
             catch (Exception e)
             {

@@ -39,9 +39,9 @@ namespace Memories.Image.Ingestor.Lambda
             var messageHandler = _serviceProvider.GetRequiredService<MessageHandler>();
             _logger.Information("Handling {@sqsMessage} Record", sqsMessage);
 
-            var s3EventNotificationRecords = JsonConvert.DeserializeObject<S3EventNotificationRecord[]>(sqsMessage.Body);
+            var s3Event = JsonConvert.DeserializeObject<S3Event>(sqsMessage.Body);
 
-            var tasks = s3EventNotificationRecords.Select(messageHandler.Handle);
+            var tasks = s3Event.Records.Select(messageHandler.Handle);
 
             await Task.WhenAll(tasks);
         }

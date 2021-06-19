@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: Handle compliance events from the account api
+Description: Handle events from the s3 bucket when an image is added
 
 Parameters:
   SLUG:
