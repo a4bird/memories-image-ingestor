@@ -29,6 +29,7 @@ namespace Memories.Image.Ingestor.Lambda
 
             try
             {
+                _logger.Information("Handling {@S3EventNotification} Record", s3EventNotification);
                 var messageAttributes = _messageAttributeHelper.Extract(s3EventNotification);
                 using var trace = new Trace(messageAttributes);
 
@@ -48,7 +49,7 @@ namespace Memories.Image.Ingestor.Lambda
             }
             catch (Exception e)
             {
-                _logger.Error(e, "Error occurred while processing SQS message {@message}", s3EventNotification);
+                _logger.Error(e, "Error occurred while processing message {@message}", s3EventNotification);
                 throw;
             }
         }

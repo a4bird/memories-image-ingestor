@@ -1,0 +1,22 @@
+{
+  "Records": [
+    {
+            "_typeTag": "SQSMessage",
+            "MessageId": "a833e1d8-f322-4430-ae70-6dbb95ad7905",
+            "ReceiptHandle": "AQEBaTPLs4FXJLxCypzXFLKNTSbEz4qGOS5zXIGvw6MkS9og9IcyyASdFlgj64lm13UQMgU6qZGcOhfFrv+7RhQjFpVQhW1sWcp+aUu+LKdKLYE5N27FLJ2+Mrr9KnqT5wG+zHTerdqWblS4qLMmNni1yNnvcDJN/IYLsY0Sq47ZEeavzPsKqCKqFVkR1js3m4XjFEo+9fG/2l33LcTSdee8NBWyNR6/xbEMkZNOlmXH2eV2cFUyunTddI8qJHlluFL+oc03OAdCqSKb7jbf5jgmm2t3WPyofvejP3jAZd1FhEfEMYFHCXbepoFtCebpZsVqYayKnwGzAbCfbKfe0QXZWuuFiuzJHPuMJ9xogW+y13SPGtXIePsga++Cn7f14/SasWcM0DkQpd+3VDW8xBOI5NT2euaDEhvob5sQdX2chm8=",
+            "Body": "{\"Records\":[{\"eventVersion\":\"2.1\",\"eventSource\":\"aws:s3\",\"awsRegion\":\"ap-southeast-2\",\"eventTime\":\"2021-06-19T00:10:24.688Z\",\"eventName\":\"ObjectCreated:Put\",\"userIdentity\":{\"principalId\":\"A1J29GDI49YS8B\"},\"requestParameters\":{\"sourceIPAddress\":\"165.225.114.100\"},\"responseElements\":{\"x-amz-request-id\":\"WN5JVST0RHPSVVCT\",\"x-amz-id-2\":\"cNUmqOpIgcpnBfh/fw5Y4cvaAnhwhH1D0srZw6F6Mb66NPJ4JG6J1ou/MCkaPvW0Q5ZNJOFktgZUy5qwSNMqWgp58ZdPOPU5\"},\"s3\":{\"s3SchemaVersion\":\"1.0\",\"configurationId\":\"memories-album-photos-test-event\",\"bucket\":{\"name\":\"my-memories-bucket\",\"ownerIdentity\":{\"principalId\":\"A1J29GDI49YS8B\"},\"arn\":\"arn:aws:s3:::my-memories-bucket\"},\"object\":{\"key\":\"images/albums/TimeSheet/07Jun+-+11Jun+21.PNG\",\"size\":310314,\"eTag\":\"d6a840b7ec817819f13f59d4ea018dbc\",\"sequencer\":\"0060CD35F494ECD240\"}}}]}",
+            "Md5OfBody": "3e67e67ba3180368b024895aa4aafd7c",
+            "Md5OfMessageAttributes": null,
+            "EventSourceArn": "arn:aws:sqs:ap-southeast-2:989464300156:memories-album-photos-test",
+            "EventSource": "aws:sqs",
+            "AwsRegion": "ap-southeast-2",
+            "Attributes": {
+                "ApproximateReceiveCount": "5",
+                "SentTimestamp": "1624061430129",
+                "SenderId": "AIDAI32VHCC23ON2HJ2FY",
+                "ApproximateFirstReceiveTimestamp": "1624061430129"
+            },
+            "MessageAttributes": {}
+        }
+  ]
+}

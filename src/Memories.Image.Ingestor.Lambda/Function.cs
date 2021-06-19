@@ -2,8 +2,12 @@
 using System.Threading.Tasks;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.S3Events;
+using Amazon.Lambda.SQSEvents;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using Serilog;
+using static Amazon.Lambda.SQSEvents.SQSEvent;
+using static Amazon.S3.Util.S3EventNotification;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
@@ -20,12 +24,24 @@ namespace Memories.Image.Ingestor.Lambda
             _logger = _serviceProvider.GetRequiredService<ILogger>();
         }
 
-        public async Task Execute(S3Event s3Event)
+        public async Task Execute(SQSEvent sqsEvent)
         {
-            var messageHandler = _serviceProvider.GetRequiredService<MessageHandler>();
-            _logger.Information("Beginning to process {Count} records.", s3Event.Records.Count);
+            
+            _logger.Information("Beginning to process {Count} records.", sqsEvent.Records.Count);
 
-            var tasks = s3Event.Records.Select(messageHandler.Handle);
+            var tasks = sqsEvent.Records.Select(HandleSqsMessage);
+
+            await Task.WhenAll(tasks);
+        }
+
+        async Task HandleSqsMessage(SQSMessage sqsMessage) {
+
+            var messageHandler = _serviceProvider.GetRequiredService<MessageHandler>();
+            _logger.Information("Handling {@sqsMessage} Record", sqsMessage);
+
+            var s3EventNotificationRecords = JsonConvert.DeserializeObject<S3EventNotificationRecord[]>(sqsMessage.Body);
+
+            var tasks = s3EventNotificationRecords.Select(messageHandler.Handle);
 
             await Task.WhenAll(tasks);
         }
