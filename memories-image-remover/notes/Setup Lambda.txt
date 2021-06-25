@@ -1,0 +1,49 @@
+https://ap-southeast-2.console.aws.amazon.com/sqs/v2/home?region=ap-southeast-2#/queues/https%3A%2F%2Fsqs.ap-southeast-2.amazonaws.com%2F989464300156%2Fmemories-album-photos-test/send-receive#/
+
+https://s3.console.aws.amazon.com/s3/object/my-memories-bucket?prefix=images/albums/TimeSheet/03May+-+07May+21.PNG
+
+STP.Lambda.Template.Lambda -> Memories.Image.Ingestor.Lambda
+
+S3 Event
+
+
+String 'Fri Jun 11 2021 20:51:27 GMT+1000 (Australian Eastern Standard Time)' was not recognized as a valid DateTime.
+
+{
+  "Records": [
+    {
+      "eventVersion": "2.1",
+      "eventSource": "aws:s3",
+      "awsRegion": "ap-southeast-2",
+      "eventTime": "2021-06-14T06:11:21.701Z",
+      "eventName": "ObjectCreated:Put",
+      "userIdentity": {
+        "principalId": "AWS:AIDA6MYFLBJ6JRTJBEM3C"
+      },
+      "requestParameters": {
+        "sourceIPAddress": "14.201.22.187"
+      },
+      "responseElements": {
+        "x-amz-request-id": "45ZD4Y7RAA27R63W",
+        "x-amz-id-2": "wLaL+qxhmHMPsVaGLpnWzHuQASFJ/veBWQgiNLeS7rZDsLLdk7vhEE2gX6w0c71UT1vD2SCr6X7V94Qj4M7i6KH35XqZa9Lo"
+      },
+      "s3": {
+        "s3SchemaVersion": "1.0",
+        "configurationId": "memories-album-photos-test-event",
+        "bucket": {
+          "name": "my-memories-bucket",
+          "ownerIdentity": {
+            "principalId": "A1J29GDI49YS8B"
+          },
+          "arn": "arn:aws:s3:::my-memories-bucket"
+        },
+        "object": {
+          "key": "images/albums/Scenic/601084dd-965a-4c54-b125-5ec37364dd1e",
+          "size": 28189,
+          "eTag": "405aa52c6887f13e76536b0fbcdcf766",
+          "sequencer": "0060C6F30FE804C611"
+        }
+      }
+    }
+  ]
+}

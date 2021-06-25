@@ -1,0 +1,77 @@
+name: Build Image Ingestor Lambda
+
+on:
+  # pull_request:
+  #   branches:
+  #     - master
+  # push:
+  #   branches:
+  #     - master
+  workflow_dispatch:
+
+env:
+  PROJECT: a4bird-memories-image-ingestor
+  AWS_PRIMARY_REGION: ap-southeast-2
+  AWS_ROLE_TO_ASSUME: arn:aws:iam::${{ secrets.AWS_ACCOUNT_NUMBER }}:role/admin
+  BUILD_NUMBER: ${{ format('1.0.0.{0}', github.run_number) }}
+
+jobs:
+  setup:
+    name: Setup Variables
+    runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.branch-slug.outputs.branch }}
+      slug: ${{ steps.branch-slug.outputs.slug }}
+    steps:
+      - name: Create Slug
+        id: branch-slug
+        run: |
+          branch_ref=${GITHUB_REF#refs/heads/}
+          branch="${GITHUB_HEAD_REF:-$branch_ref}"
+          slug="${branch//\//-}"
+          echo ::set-output name=branch::${branch}
+          echo ::set-output name=slug::${slug,,}
+
+  build:
+    name: Build Lambda Package
+    needs: [setup]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_PRIMARY_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 1200
+
+      - name: run build script
+        run: bash ./build.sh
+        working-directory: ./build
+        env:
+          SLUG: ${{ needs.setup.outputs.slug }}
+          PROJECT: ${{ env.PROJECT }}
+          BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
+
+      # - name: Create github deployment
+      #   id: create_deployment
+      #   uses: octokit/request-action@v2.x
+      #   with:
+      #     route: POST /repos/:repository/deployments
+      #     repository: ${{ github.repository }}
+      #     mediaType: |
+      #       previews: 
+      #         - ant-man
+      #     ref: ${{ github.ref }}
+      #     environment: "development"
+      #     auto_merge: false
+      #     required_contexts: "[]"
+      #     production_environment: false
+      #     payload: "{ 'version': ${{ format('1.0.0.{0}', github.run_number) }}  }"
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.ADMIN_ORG_PAT }} # using a PAT here as the GITHUB_TOKEN doesn't propagate events (https://docs.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token#using-the-github_token-in-a-workflow)
+
