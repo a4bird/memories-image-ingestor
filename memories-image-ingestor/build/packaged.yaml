@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Handle compliance events from the account api
+Description: Handle events from the s3 bucket when an image is added
 Parameters:
   SLUG:
     Type: String
@@ -33,7 +33,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Project}-${EnvironmentSuffix}-${SLUG}
-      CodeUri: s3://a4bird-memories-lambda-repo/a4bird-memories-image-ingestor/1.0.0.8/b4f967b76026ba0f734c364f6f10c994
+      CodeUri: s3://a4bird-memories-lambda-repo/a4bird-memories-image-ingestor/1.0.0.3/db4fe9f5117f91248a0e64e947be0cf0
       Handler: Memories.Image.Ingestor.Lambda::Memories.Image.Ingestor.Lambda.Function::Execute
       Runtime: dotnetcore3.1
       Timeout: 180
@@ -88,5 +88,5 @@ Resources:
         Fn::GetAtt:
         - Function
         - Arn
-      EventSourceArn: arn:aws:sqs:ap-southeast-2:989464300156:memories-album-photos-test
+      EventSourceArn: arn:aws:sqs:ap-southeast-2:989464300156:memories-album-ingest-photos-test
       MaximumBatchingWindowInSeconds: 10

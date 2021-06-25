@@ -2,19 +2,19 @@
   "Records": [
     {
             "_typeTag": "SQSMessage",
-            "MessageId": "a833e1d8-f322-4430-ae70-6dbb95ad7905",
-            "ReceiptHandle": "AQEBaTPLs4FXJLxCypzXFLKNTSbEz4qGOS5zXIGvw6MkS9og9IcyyASdFlgj64lm13UQMgU6qZGcOhfFrv+7RhQjFpVQhW1sWcp+aUu+LKdKLYE5N27FLJ2+Mrr9KnqT5wG+zHTerdqWblS4qLMmNni1yNnvcDJN/IYLsY0Sq47ZEeavzPsKqCKqFVkR1js3m4XjFEo+9fG/2l33LcTSdee8NBWyNR6/xbEMkZNOlmXH2eV2cFUyunTddI8qJHlluFL+oc03OAdCqSKb7jbf5jgmm2t3WPyofvejP3jAZd1FhEfEMYFHCXbepoFtCebpZsVqYayKnwGzAbCfbKfe0QXZWuuFiuzJHPuMJ9xogW+y13SPGtXIePsga++Cn7f14/SasWcM0DkQpd+3VDW8xBOI5NT2euaDEhvob5sQdX2chm8=",
-            "Body": "{\"Records\":[{\"eventVersion\":\"2.1\",\"eventSource\":\"aws:s3\",\"awsRegion\":\"ap-southeast-2\",\"eventTime\":\"2021-06-19T00:10:24.688Z\",\"eventName\":\"ObjectCreated:Put\",\"userIdentity\":{\"principalId\":\"A1J29GDI49YS8B\"},\"requestParameters\":{\"sourceIPAddress\":\"165.225.114.100\"},\"responseElements\":{\"x-amz-request-id\":\"WN5JVST0RHPSVVCT\",\"x-amz-id-2\":\"cNUmqOpIgcpnBfh/fw5Y4cvaAnhwhH1D0srZw6F6Mb66NPJ4JG6J1ou/MCkaPvW0Q5ZNJOFktgZUy5qwSNMqWgp58ZdPOPU5\"},\"s3\":{\"s3SchemaVersion\":\"1.0\",\"configurationId\":\"memories-album-photos-test-event\",\"bucket\":{\"name\":\"my-memories-bucket\",\"ownerIdentity\":{\"principalId\":\"A1J29GDI49YS8B\"},\"arn\":\"arn:aws:s3:::my-memories-bucket\"},\"object\":{\"key\":\"images/albums/TimeSheet/6a8a7a45-c928-481e-a573-b25a8c6e8e68\",\"size\":310314,\"eTag\":\"d6a840b7ec817819f13f59d4ea018dbc\",\"sequencer\":\"0060CD35F494ECD240\"}}}]}",
-            "Md5OfBody": "3e67e67ba3180368b024895aa4aafd7c",
+            "MessageId": "fcae115d-218b-464f-9eaf-3d1dcbb61110",
+            "ReceiptHandle": "AQEBx+vD5N3HCHKLpSQEC5b0nIEW6FyQEJHIlRjoGYpnQM3bjSk2YCmdgjHD5RAf9rfLpZV7XQx2DOpgKcfxVgZRbKuayWyO1woXEUKwYET6iuvSZc+86+rOWPP7RcSxsUVHUlKWHWh0mn/CGfrJM9MUOtm35CRjTu2jmzclG1uydXWICA+Qm6rvv1DqvksL7UE5Xm64+LiYZvBNxAFGrQmOLGom3I4BOgMjRdPG8/XCApAEiiBDUniJi8LPMooDW28nba4C4F+ewk7FdRGHMz6W9VGRFiCBUC5lGLywU7sTwWm9xNIlwl3mXsVr2mX+/9anfooHyAEbljNvt2m8rPoQF0baHIAXRDynu4lZ4LRJTqw8WPTVya385oY1Fs59ZLAorZBXKp4ch6g/yotcS/h0D/Q+mJEQG8l9IF7bdnJdYnk=",
+            "Body": "{\"Records\":[{\"eventVersion\":\"2.1\",\"eventSource\":\"aws:s3\",\"awsRegion\":\"ap-southeast-2\",\"eventTime\":\"2021-06-25T12:42:43.751Z\",\"eventName\":\"ObjectCreated:Put\",\"userIdentity\":{\"principalId\":\"AWS:AIDA6MYFLBJ6JRTJBEM3C\"},\"requestParameters\":{\"sourceIPAddress\":\"165.225.115.68\"},\"responseElements\":{\"x-amz-request-id\":\"M3CHVHTFPPCPX8EA\",\"x-amz-id-2\":\"1iCVE+rVJktmSMkmngMH3UNiUpcrGVfWz0XRRRkRPmMa+y8wgkxhpNJ+yM78UZX44+aNDU+Fc4GW2vT8MS5crtljiNNGowtp\"},\"s3\":{\"s3SchemaVersion\":\"1.0\",\"configurationId\":\"memories-album-photos-test-event\",\"bucket\":{\"name\":\"my-memories-bucket\",\"ownerIdentity\":{\"principalId\":\"A1J29GDI49YS8B\"},\"arn\":\"arn:aws:s3:::my-memories-bucket\"},\"object\":{\"key\":\"images/ab1303%40gmail.com/albums/timesheet/ca727ebd-7f16-4f84-87a1-daaa657d4427\",\"size\":260244,\"eTag\":\"f5d5c414c09af448abeac2e7894e81ae\",\"sequencer\":\"0060D5CF4C2D383A54\"}}}]}",
+            "Md5OfBody": "4c32c89425857c385242b3deb32d8d25",
             "Md5OfMessageAttributes": null,
-            "EventSourceArn": "arn:aws:sqs:ap-southeast-2:989464300156:memories-album-photos-test",
+            "EventSourceArn": "arn:aws:sqs:ap-southeast-2:989464300156:memories-album-ingest-photos-test",
             "EventSource": "aws:sqs",
             "AwsRegion": "ap-southeast-2",
             "Attributes": {
-                "ApproximateReceiveCount": "5",
-                "SentTimestamp": "1624061430129",
+                "ApproximateReceiveCount": "1",
+                "SentTimestamp": "1624624973471",
                 "SenderId": "AIDAI32VHCC23ON2HJ2FY",
-                "ApproximateFirstReceiveTimestamp": "1624061430129"
+                "ApproximateFirstReceiveTimestamp": "1624624973476"
             },
             "MessageAttributes": {}
         }

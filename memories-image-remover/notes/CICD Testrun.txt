@@ -1,13 +1,26 @@
+---- CICD
+cd build
+export AWS_PROFILE=serverless-admin-role
+
 -- build
 
-export PROJECT=a4bird-memories-image-ingestor
-export BUILD_NUMBER=1.0.0.2
+export PROJECT=a4bird-memories-image-remover
+export BUILD_NUMBER=1.0.0.1
 export SLUG=main
+
+./build.sh
 
 -- deploy
 
-export PROJECT=a4bird-memories-image-ingestor
-export BUILD_NUMBER=1.0.0.2
+export PROJECT=a4bird-memories-image-remover
+export BUILD_NUMBER=1.0.0.3
 export SLUG=main
 export ENV_SUFFIX=dev
-export ENVIRONMENT=development
+export ENVIRONMENT=Development
+
+./deploy.sh
+
+-- cleanup
+rm -rf packages/
+docker rmi a4bird-memories-image-remover:$BUILD_NUMBER
+docker rmi $(docker images -f "dangling=true" -q)

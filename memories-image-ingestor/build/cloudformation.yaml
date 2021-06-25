@@ -84,5 +84,5 @@ Resources:
     Type: AWS::Lambda::EventSourceMapping
     Properties:
       FunctionName: !GetAtt Function.Arn
-      EventSourceArn: arn:aws:sqs:ap-southeast-2:989464300156:memories-album-photos-test
+      EventSourceArn: arn:aws:sqs:ap-southeast-2:989464300156:memories-album-ingest-photos-test
       MaximumBatchingWindowInSeconds: 10

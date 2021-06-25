@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Memories.Image.Remover.Lambda.Data.Requests
+namespace Memories.Image.Remover.Lambda.Requests
 {
     public class RemoveImageRequest
     {
