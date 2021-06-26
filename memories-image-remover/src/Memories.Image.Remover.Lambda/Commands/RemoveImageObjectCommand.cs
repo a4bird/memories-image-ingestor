@@ -4,7 +4,7 @@ using Amazon.DynamoDBv2;
 using Memories.Image.Remover.Lambda.Commands;
 using Memories.Image.Remover.Lambda.Common;
 using Memories.Image.Remover.Lambda.Common.Types;
-using Memories.Image.Remover.Lambda.Data.Requests;
+using Memories.Image.Remover.Lambda.Requests;
 using Microsoft.Extensions.Options;
 using Serilog;
 

@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: Handle events from the s3 bucket when an image is added
+Description: Handle events from dynamodb and remove objects from the s3 bucket when an image is removed
 
 Parameters:
   SLUG:
@@ -34,8 +34,8 @@ Resources:
     DependsOn: LogGroup
     Properties:
       FunctionName: !Sub ${Project}-${EnvironmentSuffix}-${SLUG}
-      CodeUri: ./packages/memories-image-ingestor-lambda
-      Handler: Memories.Image.Ingestor.Lambda::Memories.Image.Ingestor.Lambda.Function::Execute
+      CodeUri: ./packages/memories-image-remover-lambda
+      Handler: Memories.Image.Remover.Lambda::Memories.Image.Remover.Lambda.Function::Execute
       Runtime: dotnetcore3.1
       Timeout: 180
       ReservedConcurrentExecutions: 1
@@ -66,23 +66,14 @@ Resources:
                 Sid: DynamoDBTableAccess
                 Action:
                   - dynamodb:GetRecords
-                  - dynamodb:DescribeTable
-                  - dynamodb:BatchWriteItem
-                  - dynamodb:PutItem
-                  - dynamodb:UpdateItem
-                Resource: "arn:aws:dynamodb:*:*:*"
+                  - dynamodb:GetShardIterator
+                  - dynamodb:DescribeStream
+                  - dynamodb:ListStreams
+                Resource: "arn:aws:dynamodb:ap-southeast-2:989464300156:table/memories-test2/stream/*"
               - Effect: Allow
-                Sid: SqsAccess
+                Sid: S3Access
                 Action:
-                  - sqs:ReceiveMessage
-                  - sqs:DeleteMessage
-                  - sqs:GetQueueAttributes
-                Resource: "arn:aws:sqs:*:*:*"
+                  - s3:DeleteObject
+                  - s3:DeleteObjectVersion
+                Resource: "arn:aws:s3:::my-memories-bucket/*"          
 
-  
-  SQSEventSourceMapping:
-    Type: AWS::Lambda::EventSourceMapping
-    Properties:
-      FunctionName: !GetAtt Function.Arn
-      EventSourceArn: arn:aws:sqs:ap-southeast-2:989464300156:memories-album-photos-test
-      MaximumBatchingWindowInSeconds: 10

@@ -57,7 +57,6 @@ namespace Memories.Image.Remover.Lambda
             services.Configure<DynamoDbOptions>(configuration.GetSection("DynamoDb"));
 
             services.AddSingleton(logger);
-            services.AddSingleton<MessageAttributeHelper>();
             services.AddTransient<MessageHandler>();
             services.AddTransient<ICloudStorage, CloudStorage>();
             services.AddTransient<IRemoveImageObjectCommand, RemoveImageObjectCommand>();

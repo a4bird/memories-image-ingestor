@@ -16,7 +16,7 @@ mkdir ./packages || true
 image_name="${PROJECT}:${BUILD_NUMBER}"
 docker build -t $image_name ../
 container_id=$(docker create $image_name)
-docker cp $container_id:./app/out/memories-image-ingestor-lambda ./packages/memories-image-ingestor-lambda
+docker cp $container_id:./app/out/memories-image-remover-lambda ./packages/memories-image-remover-lambda
 docker rm -v $container_id
 
 echo "Publishing ${PROJECT}"

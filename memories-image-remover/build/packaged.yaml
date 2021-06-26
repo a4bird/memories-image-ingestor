@@ -1,6 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Handle compliance events from the account api
+Description: Handle events from dynamodb and remove objects from the s3 bucket when
+  an image is removed
 Parameters:
   SLUG:
     Type: String
@@ -33,8 +34,8 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Project}-${EnvironmentSuffix}-${SLUG}
-      CodeUri: s3://a4bird-memories-lambda-repo/a4bird-memories-image-ingestor/1.0.0.8/b4f967b76026ba0f734c364f6f10c994
-      Handler: Memories.Image.Ingestor.Lambda::Memories.Image.Ingestor.Lambda.Function::Execute
+      CodeUri: s3://a4bird-memories-lambda-repo/a4bird-memories-image-remover/1.0.0.1/32a7e289373b8a3e1282d786172acdfe
+      Handler: Memories.Image.Remover.Lambda::Memories.Image.Remover.Lambda.Function::Execute
       Runtime: dotnetcore3.1
       Timeout: 180
       ReservedConcurrentExecutions: 1
@@ -69,24 +70,13 @@ Resources:
             Sid: DynamoDBTableAccess
             Action:
             - dynamodb:GetRecords
-            - dynamodb:DescribeTable
-            - dynamodb:BatchWriteItem
-            - dynamodb:PutItem
-            - dynamodb:UpdateItem
-            Resource: arn:aws:dynamodb:*:*:*
+            - dynamodb:GetShardIterator
+            - dynamodb:DescribeStream
+            - dynamodb:ListStreams
+            Resource: arn:aws:dynamodb:ap-southeast-2:989464300156:table/memories-test2/stream/*
           - Effect: Allow
-            Sid: SqsAccess
+            Sid: S3Access
             Action:
-            - sqs:ReceiveMessage
-            - sqs:DeleteMessage
-            - sqs:GetQueueAttributes
-            Resource: arn:aws:sqs:*:*:*
-  SQSEventSourceMapping:
-    Type: AWS::Lambda::EventSourceMapping
-    Properties:
-      FunctionName:
-        Fn::GetAtt:
-        - Function
-        - Arn
-      EventSourceArn: arn:aws:sqs:ap-southeast-2:989464300156:memories-album-photos-test
-      MaximumBatchingWindowInSeconds: 10
+            - s3:DeleteObject
+            - s3:DeleteObjectVersion
+            Resource: arn:aws:s3:::my-memories-bucket/*
