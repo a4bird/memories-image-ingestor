@@ -40,6 +40,8 @@ Resources:
       Timeout: 180
       ReservedConcurrentExecutions: 1
       Role: !GetAtt FunctionRole.Arn
+      MemorySize: 512
+      Timeout: 180
       Environment:
         Variables:
           Environment: !Ref Environment
@@ -66,14 +68,35 @@ Resources:
                 Sid: DynamoDBTableAccess
                 Action:
                   - dynamodb:GetRecords
-                  - dynamodb:GetShardIterator
-                  - dynamodb:DescribeStream
-                  - dynamodb:ListStreams
-                Resource: "arn:aws:dynamodb:ap-southeast-2:989464300156:table/a4bird-memories-table-dev-main/stream/*"
+                  - dynamodb:DescribeTable
+                  - dynamodb:BatchWriteItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                Resource: "arn:aws:dynamodb:ap-southeast-2:989464300156:table/a4bird-memories-table-dev-main"
               - Effect: Allow
                 Sid: S3Access
                 Action:
                   - s3:DeleteObject
                   - s3:DeleteObjectVersion
-                Resource: "arn:aws:s3:::my-memories-bucket/*"          
+                Resource: "arn:aws:s3:::my-memories-bucket/*"
 
+  scheduledRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: 
+      ScheduleExpression: "rate(1 minute)"
+      State:  "ENABLED"
+      Targets:
+      - 
+        Arn: !GetAtt Function.Arn
+
+  permissionForEventsToInvokeLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt Function.Arn
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: 
+        Fn::GetAtt:
+          - "scheduledRule"
+          - "Arn"

@@ -59,7 +59,7 @@ namespace Memories.Image.Remover.Lambda
             services.AddSingleton(logger);
             services.AddTransient<MessageHandler>();
             services.AddTransient<ICloudStorage, CloudStorage>();
-            services.AddTransient<IRemoveImageObjectCommand, RemoveImageObjectCommand>();
+            services.AddTransient<IRemoveImageObjectsQuery, RemoveImageObjectsQuery>();
 
 
             var awsOptions = configuration.GetAWSOptions();
