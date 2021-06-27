@@ -70,7 +70,7 @@ Resources:
                   - dynamodb:BatchWriteItem
                   - dynamodb:PutItem
                   - dynamodb:UpdateItem
-                Resource: "arn:aws:dynamodb:*:*:*"
+                Resource: "arn:aws:dynamodb:ap-southeast-2:989464300156:table/a4bird-memories-table-dev-main"
               - Effect: Allow
                 Sid: SqsAccess
                 Action:

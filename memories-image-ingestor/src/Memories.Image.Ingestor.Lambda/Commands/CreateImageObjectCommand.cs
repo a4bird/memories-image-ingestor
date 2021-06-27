@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
-using Memories.Image.Ingestor.Lambda.Commands;
 using Memories.Image.Ingestor.Lambda.Common;
 using Memories.Image.Ingestor.Lambda.Common.Types;
-using Memories.Image.Ingestor.Lambda.Data.Requests;
+using Memories.Image.Ingestor.Lambda.Data;
+using Memories.Image.Ingestor.Lambda.Requests;
 using Microsoft.Extensions.Options;
 using Serilog;
 
-namespace Memories.Image.Ingestor.Lambda.Data.Commands
+namespace Memories.Image.Ingestor.Lambda.Commands
 {
     public interface ICreateImageObjectCommand
     {
@@ -28,11 +28,12 @@ namespace Memories.Image.Ingestor.Lambda.Data.Commands
         {
 
             _logger.Information("Handling DynamoDb Request {@request}", request);
+            var objectKeyParts = request.ObjectKey.Split('/');
             var imageObjectItem = new MemoriesModel
             {
                 Account = request.Account,
                 Album = request.Album,
-                Filename = request.Filename,
+                Filename = $"{request.Filename}#{objectKeyParts[objectKeyParts.Length - 1]}",
                 ObjectKey = request.ObjectKey,
                 UploadDate = request.UploadDate
             }.ToAttributeValueMap();
@@ -42,7 +43,7 @@ namespace Memories.Image.Ingestor.Lambda.Data.Commands
                 var response = await DynamoDbClient.PutItemAsync(TableName, imageObjectItem);
 
                 return Result.Ok;
-                
+
             }
             catch (Exception e)
             {

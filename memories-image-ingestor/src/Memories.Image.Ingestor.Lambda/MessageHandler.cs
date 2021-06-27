@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Memories.Image.Ingestor.Lambda.Data.Commands;
+using Memories.Image.Ingestor.Lambda.Commands;
 using Memories.Image.Ingestor.Lambda.Services;
 using Serilog;
-using Memories.Image.Ingestor.Lambda.Data.Requests;
+using Memories.Image.Ingestor.Lambda.Requests;
 using static Amazon.S3.Util.S3EventNotification;
 using System.Net;
 

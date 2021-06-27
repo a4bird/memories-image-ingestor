@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Memories.Image.Ingestor.Lambda.Data.Requests
+namespace Memories.Image.Ingestor.Lambda.Requests
 {
     public class CreateImageRequest
     {

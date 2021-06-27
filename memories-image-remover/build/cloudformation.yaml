@@ -69,7 +69,7 @@ Resources:
                   - dynamodb:GetShardIterator
                   - dynamodb:DescribeStream
                   - dynamodb:ListStreams
-                Resource: "arn:aws:dynamodb:ap-southeast-2:989464300156:table/memories-test2/stream/*"
+                Resource: "arn:aws:dynamodb:ap-southeast-2:989464300156:table/a4bird-memories-table-dev-main/stream/*"
               - Effect: Allow
                 Sid: S3Access
                 Action:

@@ -4,7 +4,7 @@ using System.IO;
 using Amazon.DynamoDBv2;
 using Amazon.S3;
 using Memories.Image.Ingestor.Lambda.Common;
-using Memories.Image.Ingestor.Lambda.Data.Commands;
+using Memories.Image.Ingestor.Lambda.Commands;
 using Memories.Image.Ingestor.Lambda.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

@@ -33,7 +33,7 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${Project}-${EnvironmentSuffix}-${SLUG}
-      CodeUri: s3://a4bird-memories-lambda-repo/a4bird-memories-image-ingestor/1.0.0.3/db4fe9f5117f91248a0e64e947be0cf0
+      CodeUri: s3://a4bird-memories-lambda-repo/a4bird-memories-image-ingestor/1.0.0.3/0343946d64c43f2ff3a117750b25ff15
       Handler: Memories.Image.Ingestor.Lambda::Memories.Image.Ingestor.Lambda.Function::Execute
       Runtime: dotnetcore3.1
       Timeout: 180
@@ -73,7 +73,7 @@ Resources:
             - dynamodb:BatchWriteItem
             - dynamodb:PutItem
             - dynamodb:UpdateItem
-            Resource: arn:aws:dynamodb:*:*:*
+            Resource: arn:aws:dynamodb:ap-southeast-2:989464300156:table/a4bird-memories-table-dev-main
           - Effect: Allow
             Sid: SqsAccess
             Action:
